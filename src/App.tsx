@@ -12,6 +12,12 @@ function App() {
       event: 'increment',
       incrementValue: count
     })
+    //@ts-ignore
+    window.gtag('event', 'increment', {
+      event_category: 'button',
+      event_label: 'increment',
+      value: count
+    })
   },[count])
   return (
     <>
