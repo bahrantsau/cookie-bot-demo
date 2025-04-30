@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script
+      id="Cookiebot"
+      src="https://consent.cookiebot.com/uc.js"
+      data-blockingmode="auto"
+      data-cbid="b5841607-cc0f-4f34-88ac-3544d7eb3ad2"
+      data-blockingmode="auto"
+      type="text/javascript"
+    ></script>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + React + TS</title>
+    <script>
+      const trackingScripts = {
+        ga: {
+          loaded: false,
+          script: null,
+          src: "https://www.googletagmanager.com/gtag/js?id=G-N0MPXR9B3G",
+          category: "statistics",
+          initCallback: function () {
+            window.dataLayer = window.dataLayer || [];
+            window.gtag = function () {
+              dataLayer.push(arguments);
+            };
+            gtag("js", new Date());
+            gtag("config", "G-N0MPXR9B3G");
+          },
+          cleanupCallback: function () {
+            window.gtag = function () {
+              console.log("GA blocked");
+            };
+            document.cookie.split(";").forEach((cookie) => {
+              if (
+                cookie.trim().startsWith("_ga") ||
+                cookie.trim().startsWith("_gid")
+              ) {
+                document.cookie =
+                  cookie.split("=") +
+                  "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+              }
+            });
+          },
+        },
+
+        // Можно добавить другие скрипты
+      };
+
+      // Загрузка/удаление скрипта
+      const manageScript = (scriptName, load) => {
+        const config = trackingScripts[scriptName];
+        if (!config || config.loaded === load) return;
+
+        if (load) {
+          config.script = document.createElement("script");
+          config.script.src = config.src;
+          config.script.async = true;
+          document.head.appendChild(config.script);
+          config.script.onload = () => {
+            config.loaded = true;
+            config.initCallback();
+          };
+        } else if (config.script) {
+          config.script.remove();
+          config.script = null;
+          config.loaded = false;
+          config.cleanupCallback();
+        }
+      };
+
+      // Обработчик согласия
+      const handleConsent = () => {
+        if (!window.Cookiebot || !Cookiebot.consent) return;
+        Object.keys(trackingScripts).forEach((scriptName) => {
+          manageScript(
+            scriptName,
+            Cookiebot.consent[trackingScripts[scriptName].category]
+          );
+        });
+      };
+
+      // Инициализация
+      document.addEventListener("DOMContentLoaded", () => {
+        if (typeof Cookiebot !== "undefined") {
+          handleConsent();
+          [
+            "CookiebotOnAccept",
+            "CookiebotOnDecline",
+            "CookiebotOnDialogInit",
+          ].forEach((event) => {
+            window.addEventListener(event, handleConsent);
+          });
+        }
+      });
+
+      // Резервная обработка если Cookiebot не загрузился
+      setTimeout(() => {
+        if (typeof Cookiebot === "undefined") {
+          Object.keys(trackingScripts).forEach((scriptName) =>
+            manageScript(scriptName, false)
+          );
+        }
+      }, 3000);
+    </script>
+ 
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
